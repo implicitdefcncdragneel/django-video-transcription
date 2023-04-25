@@ -1,6 +1,7 @@
-django
+django==3.2
 djangorestframework
 django-cors-headers
-ffmpeg
-SpeechRecognition
-pydub
+pydub==0.25.1
+pytube
+requests==2.25.1
+SpeechRecognition==3.8.1
