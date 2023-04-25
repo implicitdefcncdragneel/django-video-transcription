@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Upload Video</h1>
+<form method="post" action="{% url 'transcribe_video' %}">
+    {% csrf_token %}
+    <input type="text" name="video_url" placeholder="Video URL">
+    <input type="submit" value="Transcribe">
+</form>
+{% endblock %}

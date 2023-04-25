@@ -1,9 +1,10 @@
+import os
 import pytube
 import subprocess
 from pydub import AudioSegment
 import speech_recognition as speech
 
-from django.http import JsonResponse
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 from video_transcription_app.models import Video
@@ -17,9 +18,6 @@ def transcribe_video(request):
         video_file = 'video.mp4'
         audio_file = 'audio.wav'
         
-        with open(audio_file, 'w') as file:
-            ...
-
         video_date = pytube.YouTube(video_url)
         stream = video_date.streams.get_highest_resolution()
         stream.download(filename="video.mp4")
@@ -36,4 +34,8 @@ def transcribe_video(request):
         video = Video.objects.create(video_url=video_url, transcript=transcript)
         video.save()
 
-        return JsonResponse({'message': transcript})
+        os.remove(video_file)
+        os.remove(audio_file)
+
+        return render(request, 'transcription.html', {'message': transcript})
+    return render(request, 'video.html')
