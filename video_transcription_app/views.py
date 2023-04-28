@@ -11,31 +11,36 @@ from video_transcription_app.models import Video
 
 @csrf_exempt
 def transcribe_video(request):
-    if request.method == 'POST':
+    try:
+        if request.method == 'POST':
 
-        video_url = request.POST.get('video_url')
+            video_url = request.POST.get('video_url')
 
-        video_file = 'video.mp4'
-        audio_file = 'audio.wav'
-        
-        video_date = pytube.YouTube(video_url)
-        stream = video_date.streams.get_highest_resolution()
-        stream.download(filename="video.mp4")
+            video_file = 'video.mp4'
+            audio_file = 'audio.wav'
+            
+            video_date = pytube.YouTube(video_url)
+            stream = video_date.streams.get_highest_resolution()
+            stream.download(filename="video.mp4")
 
-        subprocess.run(['ffmpeg', '-i', video_file, '-f', 'wav', audio_file])
-        
-        audio = AudioSegment.from_wav(audio_file)
+            subprocess.run(['ffmpeg', '-i', video_file, '-f', 'wav', audio_file])
+            
+            audio = AudioSegment.from_wav(audio_file)
 
-        rec = speech.Recognizer()
-        with speech.AudioFile(audio_file) as source:
-            audio = rec.record(source)
-        transcript = rec.recognize_google(audio)
+            rec = speech.Recognizer()
+            with speech.AudioFile(audio_file) as source:
+                audio = rec.record(source)
+            transcript = rec.recognize_google(audio)
 
-        video = Video.objects.create(video_url=video_url, transcript=transcript)
-        video.save()
+            video = Video.objects.create(video_url=video_url, transcript=transcript)
+            video.save()
 
-        os.remove(video_file)
-        os.remove(audio_file)
+            os.remove(video_file)
+            os.remove(audio_file)
 
-        return render(request, 'transcription.html', {'message': transcript})
-    return render(request, 'video.html')
+            return render(request, 'transcription_result.html', {'message': transcript})
+    except KeyError:
+        transcribe_video(request)
+    except Exception as e:
+        return render(request, 'transcription_result.html', {'message': "Please Reload The Pages"})
+    return render(request, 'transcribe_video.html')
