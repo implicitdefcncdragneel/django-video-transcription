@@ -1,0 +1,23 @@
+version: "3.7"
+
+services:
+  videotranscription:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: >
+      sh -c  "python manage.py migrate --noinput &&
+              python manage.py runserver 0.0.0.0:8000 &&
+              gunicorn video_transcription_project.wsgi:application --bind=0.0.0.0:8000 "
+    environment:
+      DEBUG: 1
+    volumes:
+      - .:/app
+    ports:
+      - 8000:8000
+    networks:
+      - video_transcription_project_network
+
+networks:
+  video_transcription_project_network:
+    driver: bridge
